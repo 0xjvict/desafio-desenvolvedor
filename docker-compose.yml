@@ -1,0 +1,130 @@
+services:
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # UID e GID precisam ser passados para garantir que os arquivos criados
+        # dentro do container tenham as permissões corretas no host,
+        # evitando problemas de acesso e edição dos arquivos do projeto.
+        USER_ID: $UID
+        GROUP_ID: $GID
+    container_name: laravel_app
+    restart: unless-stopped
+    ports:
+      - "80:8080"
+    environment:
+      PHP_MEMORY_LIMIT: "256M"
+      PHP_OPCACHE_ENABLE: "1"
+      PHP_MAX_EXECUTION_TIME: "60"
+      PHP_UPLOAD_MAX_FILE_SIZE: "50M"
+      PHP_POST_MAX_SIZE: "50M"
+      AUTORUN_ENABLED: "true"
+      AUTORUN_LARAVEL_STORAGE_LINK: "true"
+      AUTORUN_LARAVEL_MIGRATION: "true"
+      NGINX_CLIENT_MAX_BODY_SIZE: "50M"
+    volumes:
+      - .:/var/www/html
+      - laravel_storage:/var/www/html/storage
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - laravel_network
+
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile-queue
+    container_name: laravel_queue
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+      - laravel_storage:/var/www/html/storage
+    depends_on:
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - laravel_network
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: laravel_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: >
+      redis-server
+      --requirepass "${REDIS_PASSWORD:-}"
+      --appendonly yes
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - laravel_network
+
+  mongo:
+    image: mongo:7.0
+    container_name: laravel_mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "${DB_USERNAME:-laravel_user}"
+      MONGO_INITDB_ROOT_PASSWORD: "${DB_PASSWORD:-secret}"
+      MONGO_INITDB_DATABASE: "${DB_DATABASE:-laravel}"
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+      - mongo_config:/data/configdb
+    healthcheck:
+      # Agora usa as credenciais para garantir que o banco está autenticado
+      test: [ "CMD", "mongosh", "--username", "${DB_USERNAME:-laravel_user}", "--password", "${DB_PASSWORD:-secret}", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - laravel_network
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: laravel_mongo_express
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: "${DB_USERNAME:-laravel_user}"
+      ME_CONFIG_MONGODB_ADMINPASSWORD: "${DB_PASSWORD:-secret}"
+      ME_CONFIG_MONGODB_URL: "mongodb://${DB_USERNAME:-laravel_user}:${DB_PASSWORD:-secret}@mongo:27017/${DB_DATABASE:-laravel}?authSource=admin"
+      ME_CONFIG_BASICAUTH: "false"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - laravel_network
+
+volumes:
+  mongo_data:
+    driver: local
+  mongo_config:
+    driver: local
+  laravel_storage:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  laravel_network:
+    driver: bridge

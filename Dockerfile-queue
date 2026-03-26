@@ -1,0 +1,31 @@
+FROM serversideup/php:8.4-cli
+
+USER root
+
+# Instala extensões MongoDB e Redis (mesmas do app, sem overhead de web server)
+RUN apt-get update && apt-get install -y \
+    libssl-dev \
+    pkg-config \
+    && pecl install mongodb redis \
+    && docker-php-ext-enable mongodb redis \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www/html
+
+COPY . .
+
+RUN composer install \
+    --no-interaction \
+    --no-dev \
+    --optimize-autoloader \
+    --prefer-dist
+
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
+USER www-data
+
+# Inicia o queue worker diretamente
+CMD ["php", "artisan", "queue:work", "redis", "--sleep=3", "--tries=3", "--max-time=3600", "--timeout=90"]
