@@ -43,7 +43,6 @@ services:
     restart: unless-stopped
     volumes:
       - .:/var/www/html
-      - laravel_storage:/var/www/html/storage
     depends_on:
       mongo:
         condition: service_healthy
@@ -89,7 +88,6 @@ services:
       - mongo_data:/data/db
       - mongo_config:/data/configdb
     healthcheck:
-      # Agora usa as credenciais para garantir que o banco está autenticado
       test: [ "CMD", "mongosh", "--username", "${DB_USERNAME:-laravel_user}", "--password", "${DB_PASSWORD:-secret}", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping')" ]
       interval: 10s
       timeout: 5s
