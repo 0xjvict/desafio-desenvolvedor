@@ -7,6 +7,7 @@ use App\Models\FileUpload;
 use App\Services\FileProcessingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -45,7 +46,9 @@ class DashboardController extends Controller
             return back()->withErrors(['file' => 'Este arquivo já foi enviado anteriormente.']);
         }
 
-        $storedName = basename($file->store('uploads', 'local'));
+        $extension = $file->getClientOriginalExtension();
+        $storedName = Str::random(40) . '.' . $extension;
+        $file->storeAs('uploads', $storedName, 'local');
         $referenceDate = $this->service->extractReferenceDate($file->getClientOriginalName());
 
         $upload = FileUpload::create([
