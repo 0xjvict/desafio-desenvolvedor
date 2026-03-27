@@ -1,4 +1,5 @@
 *.log
+.npm-cache
 .DS_Store
 .env
 .env.backup
