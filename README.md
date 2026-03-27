@@ -1,52 +1,66 @@
-<p>
-    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQIAOtqQ5is5vwbcEn0ZahZfMxz1QIeAYtFfnLdkCXu1sqAGbnX" width="300">
- </p>
- 
-### A Oliveira Trust:
-A Oliveira Trust é uma das maiores empresas do setor Financeiro com muito orgulho, desde 1991, realizamos as maiores transações do mercado de Títulos e Valores Mobiliários.
+# Laravel + MongoDB + Redis + Docker
 
-Somos uma empresa em que valorizamos o nosso colaborador em primeiro lugar, sempre! Alinhando isso com a nossa missão "Promover a satisfação dos nossos clientes e o desenvolvimento pessoal e profissional da nossa equipe", estamos construindo times excepcionais em Tecnologia, Comercial, Engenharia de Software, Produto, Financeiro, Jurídico e Data Science.
+Projeto Laravel usando MongoDB, Redis e Horizon, tudo em containers Docker, com build de assets via Vite.
 
-Estamos buscando uma pessoa que seja movida a desafios, que saiba trabalhar em equipe e queira revolucionar o mercado financeiro!
+## Requisitos
 
-Front-end? Back-end? Full Stack? Analista de dados? Queremos conhecer gente boa, que goste de colocar a mão na massa, seja responsável e queira fazer história!
+- [Docker](https://docs.docker.com/get-docker/) (20.10+)
+- [Docker Compose](https://docs.docker.com/compose/install/) (2.0+)
 
-#### O que você precisa saber para entrar no nosso time: 🚀
-- Trabalhar com frameworks (Laravel, Lumen, Yii, Cake, Symfony ou outros...)
-- Banco de dados relacional (MySql, MariaDB)
-- Trabalhar com microsserviços
+## Inicialização rápida (Docker)
 
-#### O que seria legal você saber também: 🚀
-- Conhecimento em banco de dados não relacional;
-- Conhecimento em docker;
-- Conhecimento nos serviços da AWS (RDS, DynamoDB, DocumentDB, Elasticsearch);
-- Conhecimento em metodologias ágeis (Scrum/Kanban);
+1) Copie o arquivo de ambiente:
+```bash
+cp .env.example .env
+```
 
-#### Ao entrar nessa jornada com o nosso time, você vai: 🚀
-- Trabalhar em uma equipe de tecnologia, em um ambiente leve e descontraído e vivenciar a experiência de mudar o mercado financeiro;
-- Dress code da forma que você se sentir mais confortável;
-- Flexibilidade para home office e horários;
-- Acesso a cursos patrocinados pela empresa;
+2) Rode o script de setup (dependências + build de assets + permissões):
+```bash
+chmod +x setup.sh
+./setup.sh
+```
 
-#### Benefícios 🚀
-- Salário compatível com o mercado;
-- Vale Refeição (CAJU);
-- Vale Alimentação (CAJU);
-- Vale Transporte ou Vale Combustível (CAJU);
-- Plano de Saúde e Odontológico;
-- Seguro de vida;
-- PLR Semestral;
-- Horário Flexível;
-- Parcerias em farmácias
+3) Suba os containers:
+```bash
+docker compose up -d
+```
 
-#### Local: 🚀
-Barra da Tijuca, Rio de Janeiro, RJ
+4) Gere as chaves da aplicação:
+```bash
+docker compose exec app php artisan key:generate
+docker compose exec app php artisan jwt:secret
+```
 
-#### Conheça mais sobre nós! :sunglasses:
-- Website (https://www.oliveiratrust.com.br/)
-- LinkedIn (https://www.linkedin.com/company/oliveiratrust/)
+## Serviços e portas
 
-A Oliveira Trust acredita na inclusão e na promoção da diversidade em todas as suas formas. Temos como valores o respeito e valorização das pessoas e combatemos qualquer tipo de discriminação. Incentivamos a todos que se identifiquem com o perfil e requisitos das vagas disponíveis que candidatem, sem qualquer distinção.
+- **Aplicação Laravel**: `http://localhost:8080` (ou `APP_PORT` no `.env`)
+- **Mongo Express**: `http://localhost:8081`
+- **MongoDB**: `localhost:27017`
+- **Redis**: `localhost:6379`
 
-## Pronto para o desafio? 🚀🚀🚀🚀
-https://github.com/Oliveira-Trust/desafio-desenvolvedor/blob/master/vaga3.md
+## O que o setup faz
+
+O `setup.sh`:
+- constrói a imagem `laravel_builder`;
+- instala dependências PHP e JS;
+- compila os assets (`npm run build`);
+- ajusta permissões de `storage/` e `bootstrap/cache`.
+
+## Comandos úteis
+
+- Logs do app: `docker compose logs -f app`
+- Parar: `docker compose down`
+- Reiniciar: `docker compose restart`
+- Artisan no container: `docker compose exec app php artisan <comando>`
+- Testes: `docker compose exec app php artisan test`
+
+## Solução de problemas
+
+### Permissão nos logs
+Se aparecer `Failed to open stream: Permission denied`, rode novamente:
+```bash
+./setup.sh
+```
+
+### Container não sobe
+Verifique os logs com `docker compose logs` e confirme `.env` criado.
