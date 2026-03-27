@@ -1,66 +1,66 @@
-# Laravel com MongoDB, Redis e Docker
+# Laravel + MongoDB + Redis + Docker
 
-Este é um projeto Laravel que utiliza MongoDB como banco de dados, Redis para filas e cache, e Horizon para gerenciamento de filas. Todo o ambiente é executado em containers Docker.
+Este projeto usa Laravel com MongoDB, Redis e Horizon, tudo em containers Docker, com build de assets via Vite.
 
-## Pré-requisitos
+## Requisitos
 
-- [Docker](https://docs.docker.com/get-docker/) (versão 20.10+)
-- [Docker Compose](https://docs.docker.com/compose/install/) (versão 2.0+)
+- [Docker](https://docs.docker.com/get-docker/) (20.10+)
+- [Docker Compose](https://docs.docker.com/compose/install/) (2.0+)
 
-## Passo a passo para rodar o projeto
+## Inicialização rápida (Docker)
 
-### 1. Clone o repositório
-```bash
-git clone <url-do-repositorio>
-cd <nome-do-projeto>
-```
-
-### 2. Crie o arquivo de ambiente
-Copie o arquivo de exemplo e ajuste se necessário:
+1) Copie o arquivo de ambiente:
 ```bash
 cp .env.example .env
 ```
-As credenciais padrão já funcionam com os containers (usuário: `laravel_user`, senha: `secret`). Você pode alterar se quiser.
 
-### 3. Execute o script de configuração
-Esse script instala as dependências PHP e JavaScript, compila os assets e ajusta as permissões dos diretórios de log/cache.
+2) Rode o script de setup (dependências + build de assets + permissões):
 ```bash
 chmod +x setup.sh
 ./setup.sh
 ```
 
-### 4. Inicie os containers
+3) Suba os containers:
 ```bash
 docker compose up -d
 ```
 
-### 5. Gere as chaves da aplicação
-Após os containers estarem rodando, execute:
+4) Gere as chaves da aplicação:
 ```bash
 docker compose exec app php artisan key:generate
 docker compose exec app php artisan jwt:secret
 ```
 
-## Acessando a aplicação
+## Serviços e portas
 
-- **Aplicação Laravel**: `http://localhost:8080` (ou a porta definida em `APP_PORT` no `.env`)
-- **Mongo Express (admin do MongoDB)**: `http://localhost:8081`
+- **Aplicação Laravel**: `http://localhost:8080` (ou `APP_PORT` no `.env`)
+- **Mongo Express**: `http://localhost:8081`
+- **MongoDB**: `localhost:27017`
+- **Redis**: `localhost:6379`
+
+## O que o setup faz
+
+O `setup.sh`:
+- constrói a imagem `laravel_builder`;
+- instala dependências PHP e JS;
+- compila os assets (`npm run build`);
+- ajusta permissões de `storage/` e `bootstrap/cache`.
 
 ## Comandos úteis
 
-- Ver logs do container `app`: `docker compose logs -f app`
-- Parar os containers: `docker compose down`
+- Logs do app: `docker compose logs -f app`
+- Parar: `docker compose down`
 - Reiniciar: `docker compose restart`
-- Executar comandos Artisan dentro do container: `docker compose exec app php artisan <comando>`
+- Artisan no container: `docker compose exec app php artisan <comando>`
+- Testes: `docker compose exec app php artisan test`
 
 ## Solução de problemas
 
-### Erro de permissão nos logs
-Se aparecer `Failed to open stream: Permission denied` ao tentar escrever no log, execute novamente o script de configuração:
+### Permissão nos logs
+Se aparecer `Failed to open stream: Permission denied`, rode novamente:
 ```bash
 ./setup.sh
 ```
-Isso irá corrigir as permissões.
 
 ### Container não sobe
-Verifique os logs com `docker compose logs`. Certifique-se de que o arquivo `.env` foi criado e que as credenciais do MongoDB e Redis estão corretas.
+Verifique os logs com `docker compose logs` e confirme `.env` criado.
