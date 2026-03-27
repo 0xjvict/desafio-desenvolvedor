@@ -183,7 +183,7 @@ class FileProcessingService
         // Trim all string values
         foreach ($row as $key => $value) {
             if (is_string($value)) {
-                $row[$key] = trim($value);
+                $row[$key] = trim(preg_replace('/[\r\n]+/', ' ', $value));
             }
         }
 
