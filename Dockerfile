@@ -110,7 +110,12 @@ WORKDIR /var/www/html
 
 COPY --from=builder /var/www/html /var/www/html
 
-RUN chown -R www-data:www-data storage bootstrap/cache
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
+RUN docker-php-serversideup-set-id www-data ${USER_ID}:${GROUP_ID} \
+    && docker-php-serversideup-set-file-permissions \
+        --owner ${USER_ID}:${GROUP_ID}
 
 USER www-data
 

@@ -3,12 +3,11 @@
 # Em produção use: docker compose -f docker-compose.yml up
 
 services:
-
   app:
     volumes:
       - .:/var/www/html:cached
-      - /var/www/html/vendor
-      - /var/www/html/node_modules
+      # - /var/www/html/vendor
+      # - /var/www/html/node_modules
     ports:
       - "${APP_PORT:-8080}:8080"
     environment:
@@ -20,8 +19,8 @@ services:
   queue:
     volumes:
       - .:/var/www/html:cached
-      - /var/www/html/vendor
-      - /var/www/html/node_modules
+      # - /var/www/html/vendor
+      # - /var/www/html/node_modules
     environment:
       APP_ENV: local
       APP_DEBUG: "true"
@@ -29,8 +28,8 @@ services:
   scheduler:
     volumes:
       - .:/var/www/html:cached
-      - /var/www/html/vendor
-      - /var/www/html/node_modules
+      # - /var/www/html/vendor
+      # - /var/www/html/node_modules
     environment:
       APP_ENV: local
       APP_DEBUG: "true"
