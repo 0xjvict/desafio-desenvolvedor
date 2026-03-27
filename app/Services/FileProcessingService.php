@@ -56,10 +56,10 @@ class FileProcessingService
                 $delimiter = $this->detectDelimiter($firstLine);
             }
 
-            $headers  = array_map('trim', str_getcsv($firstLine, $delimiter));
+            $headers = array_map('trim', str_getcsv($firstLine, $delimiter));
             $colCount = count($headers);
-            $batch    = [];
-            $total    = 0;
+            $batch = [];
+            $total = 0;
 
             while (!feof($handle)) {
                 $row = $this->readRow($handle, $delimiter, $colCount);
@@ -67,7 +67,7 @@ class FileProcessingService
                     continue;
                 }
 
-                $data      = array_combine($headers, $row);
+                $data = array_combine($headers, $row);
                 $validated = $this->validateAndTransformRow($data);
                 if ($validated === null) {
                     continue;
@@ -78,7 +78,7 @@ class FileProcessingService
                 if (count($batch) >= self::BATCH_SIZE) {
                     $this->insertBatch($batch);
                     $total += count($batch);
-                    $batch  = [];
+                    $batch = [];
                     $upload->update(['processed_records' => $total]);
                 }
             }
