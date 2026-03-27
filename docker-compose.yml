@@ -38,6 +38,9 @@ services:
       context: .
       dockerfile: Dockerfile
       target: queue
+      args:
+        USER_ID: ${UID:-1000}
+        GROUP_ID: ${GID:-1000}
     image: laravel_queue
     container_name: laravel_queue
     restart: unless-stopped
@@ -61,6 +64,9 @@ services:
       context: .
       dockerfile: Dockerfile
       target: scheduler
+      args:
+        USER_ID: ${UID:-1000}
+        GROUP_ID: ${GID:-1000}
     image: laravel_scheduler
     container_name: laravel_scheduler
     restart: unless-stopped

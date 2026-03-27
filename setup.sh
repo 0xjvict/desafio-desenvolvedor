@@ -56,12 +56,11 @@ docker run --rm \
     laravel_builder \
     npm run build
 
-## Ajusta permissões dos diretórios de storage e cache (crítico para logs)
-#echo -e "${GREEN}🔧 Ajustando permissões de diretórios para logs e cache...${NC}"
-#mkdir -p storage/logs storage/framework/{sessions,views,cache}
-#chmod -R 775 storage bootstrap/cache
-#chown -R "$(id -u):$(id -g)" storage bootstrap/cache
-#touch storage/logs/laravel.log
-#chmod 664 storage/logs/laravel.log
+# Ajusta permissões dos diretórios de storage e cache (crítico para logs)
+echo -e "${GREEN}🔧 Ajustando permissões de diretórios para logs e cache...${NC}"
+mkdir -p storage/logs storage/framework/{sessions,views,cache}
+chmod -R 775 storage bootstrap/cache
+touch storage/logs/laravel.log
+chmod 664 storage/logs/laravel.log
 
 echo -e "${GREEN}✅ Setup concluído! Agora execute: docker compose up -d${NC}"
