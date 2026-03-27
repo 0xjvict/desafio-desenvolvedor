@@ -28,4 +28,4 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 USER www-data
 
 # Inicia o queue worker diretamente
-CMD ["php", "artisan", "queue:work", "redis", "--sleep=3", "--tries=3", "--max-time=3600", "--timeout=90"]
+CMD ["php", "artisan", "horizon"]
