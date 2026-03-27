@@ -1,0 +1,15 @@
+services:
+  app:
+    volumes:
+      - .:/var/www/html
+      - /var/www/html/vendor
+      - /var/www/html/node_modules
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+
+  queue:
+    volumes:
+      - .:/var/www/html
+      - /var/www/html/vendor
+      - /var/www/html/node_modules

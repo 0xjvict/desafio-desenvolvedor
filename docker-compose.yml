@@ -4,10 +4,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: app
       args:
-        # UID e GID precisam ser passados para garantir que os arquivos criados
-        # dentro do container tenham as permissões corretas no host,
-        # evitando problemas de acesso e edição dos arquivos do projeto.
         USER_ID: $UID
         GROUP_ID: $GID
     container_name: laravel_app
@@ -24,8 +22,6 @@ services:
       AUTORUN_LARAVEL_STORAGE_LINK: "true"
       AUTORUN_LARAVEL_MIGRATION: "true"
       NGINX_CLIENT_MAX_BODY_SIZE: "50M"
-    volumes:
-      - .:/var/www/html
     depends_on:
       mongo:
         condition: service_healthy
@@ -37,11 +33,10 @@ services:
   queue:
     build:
       context: .
-      dockerfile: Dockerfile-queue
+      dockerfile: Dockerfile
+      target: queue
     container_name: laravel_queue
     restart: unless-stopped
-    volumes:
-      - .:/var/www/html
     depends_on:
       mongo:
         condition: service_healthy
@@ -119,13 +114,8 @@ services:
 
 volumes:
   mongo_data:
-    driver: local
   mongo_config:
-    driver: local
-  laravel_storage:
-    driver: local
   redis_data:
-    driver: local
 
 networks:
   laravel_network:
