@@ -26,7 +26,6 @@ services:
       NGINX_CLIENT_MAX_BODY_SIZE: "50M"
     volumes:
       - .:/var/www/html
-      - laravel_storage:/var/www/html/storage
     depends_on:
       mongo:
         condition: service_healthy
