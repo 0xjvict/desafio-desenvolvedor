@@ -8,8 +8,6 @@ use Illuminate\View\View;
 
 class InstrumentController extends Controller
 {
-    private const int CACHE_TTL = 600;
-
     public function index(Request $request): View
     {
         $request->validate([
