@@ -1,66 +1,115 @@
-#!/bin/bash
-set -e
+# Laravel + MongoDB + Redis + Docker
 
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
+Projeto Laravel usando MongoDB, Redis e Horizon, tudo em containers Docker, com build de assets via Vite.
 
-echo -e "${GREEN}🚀 Configurando ambiente...${NC}"
+## Requisitos
 
-# Verifica se o Docker está disponível
-if ! command -v docker &> /dev/null; then
-    echo -e "${YELLOW}⚠️  Docker não encontrado. Instale o Docker antes de continuar.${NC}"
-    exit 1
-fi
+- [Docker](https://docs.docker.com/get-docker/) (20.10+)
+- [Docker Compose](https://docs.docker.com/compose/install/) (2.0+)
 
-# Constrói a imagem builder localmente (inclui PHP, Composer, Node, e extensões mongodb, gd)
-echo -e "${GREEN}🔨 Construindo imagem builder local...${NC}"
-docker build --target builder -t laravel_builder .
+## Inicialização rápida (Docker)
 
-# Instala dependências PHP usando a imagem builder
-echo -e "${GREEN}📦 Instalando dependências PHP...${NC}"
-docker run --rm \
-    -v "$(pwd)":/var/www/html \
-    -w /var/www/html \
-    -u "$(id -u):$(id -g)" \
-    laravel_builder \
-    composer install \
-        --no-interaction \
-        --prefer-dist \
-        --optimize-autoloader
+1) Copie o arquivo de ambiente:
+```bash
+cp .env.example .env
+```
 
-# Prepara diretório de cache npm local com permissões adequadas
-echo -e "${GREEN}📁 Preparando cache npm local...${NC}"
-mkdir -p .npm-cache
-chown "$(id -u):$(id -g)" .npm-cache
+2) Rode o script de setup (dependências + build de assets + permissões):
+```bash
+chmod +x setup.sh
+./setup.sh
+```
 
-# Remove node_modules antigo para evitar conflitos
-echo -e "${GREEN}🧹 Removendo node_modules antigo...${NC}"
-rm -rf node_modules
+## Serviços e portas
 
-# Instala dependências JavaScript usando a mesma imagem builder
-echo -e "${GREEN}📦 Instalando dependências JavaScript...${NC}"
-docker run --rm \
-    -v "$(pwd)":/var/www/html \
-    -w /var/www/html \
-    -u "$(id -u):$(id -g)" \
-    laravel_builder \
-    npm ci --cache ./.npm-cache --no-clean
+- **Aplicação Laravel**: `http://localhost`
+- **Mongo Express**: `http://localhost:8081`
+- **MongoDB**: `localhost:27017`
+- **Redis**: `localhost:6379`
 
-# Compila assets
-echo -e "${GREEN}🔨 Compilando assets...${NC}"
-docker run --rm \
-    -v "$(pwd)":/var/www/html \
-    -w /var/www/html \
-    -u "$(id -u):$(id -g)" \
-    laravel_builder \
-    npm run build
+## O que o setup faz
 
-# Ajusta permissões dos diretórios de storage e cache (crítico para logs)
-echo -e "${GREEN}🔧 Ajustando permissões de diretórios para logs e cache...${NC}"
-mkdir -p storage/logs storage/framework/{sessions,views,cache}
-chmod -R 775 storage bootstrap/cache
-touch storage/logs/laravel.log
-chmod 664 storage/logs/laravel.log
+O `setup.sh`:
+- constrói a imagem `laravel_builder`;
+- instala dependências PHP e JS;
+- compila os assets (`npm run build`);
+- ajusta permissões de `storage/` e `bootstrap/cache`.
 
-echo -e "${GREEN}✅ Setup concluído! Agora execute: docker compose up -d${NC}"
+## Comandos úteis
+
+- Logs do app: `docker compose logs -f app`
+- Parar: `docker compose down`
+- Reiniciar: `docker compose restart`
+- Artisan no container: `docker compose exec app php artisan <comando>`
+- Testes: `docker compose exec app php artisan test`
+
+## Solução de problemas
+
+### Permissão nos logs
+Se aparecer `Failed to open stream: Permission denied`, rode novamente:
+```bash
+./setup.sh
+```
+
+### Container não sobe
+Verifique os logs com `docker compose logs` e confirme `.env` criado.
+# Laravel + MongoDB + Redis + Docker
+
+Projeto Laravel usando MongoDB, Redis e Horizon, tudo em containers Docker, com build de assets via Vite.
+
+## Requisitos
+
+- [Docker](https://docs.docker.com/get-docker/) (20.10+)
+- [Docker Compose](https://docs.docker.com/compose/install/) (2.0+)
+
+## Inicialização rápida (Docker)
+
+1) Copie o arquivo de ambiente:
+```bash
+cp .env.example .env
+```
+
+2) Rode o script de setup (dependências + build de assets + permissões):
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+3) Suba os containers:
+```bash
+docker compose up -d
+```
+
+## Serviços e portas
+
+- **Aplicação Laravel**: `http://localhost:8080` (ou `APP_PORT` no `.env`)
+- **Mongo Express**: `http://localhost:8081`
+- **MongoDB**: `localhost:27017`
+- **Redis**: `localhost:6379`
+
+## O que o setup faz
+
+O `setup.sh`:
+- constrói a imagem `laravel_builder`;
+- instala dependências PHP e JS;
+- compila os assets (`npm run build`);
+- ajusta permissões de `storage/` e `bootstrap/cache`.
+
+## Comandos úteis
+
+- Logs do app: `docker compose logs -f app`
+- Parar: `docker compose down`
+- Reiniciar: `docker compose restart`
+- Artisan no container: `docker compose exec app php artisan <comando>`
+- Testes: `docker compose exec app php artisan test`
+
+## Solução de problemas
+
+### Permissão nos logs
+Se aparecer `Failed to open stream: Permission denied`, rode novamente:
+```bash
+./setup.sh
+```
+
+### Container não sobe
+Verifique os logs com `docker compose logs` e confirme `.env` criado.

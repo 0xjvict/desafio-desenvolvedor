@@ -20,20 +20,9 @@ chmod +x setup.sh
 ./setup.sh
 ```
 
-3) Suba os containers:
-```bash
-docker compose up -d
-```
-
-4) Gere as chaves da aplicação:
-```bash
-docker compose exec app php artisan key:generate
-docker compose exec app php artisan jwt:secret
-```
-
 ## Serviços e portas
 
-- **Aplicação Laravel**: `http://localhost:8080` (ou `APP_PORT` no `.env`)
+- **Aplicação Laravel**: `http://localhost`
 - **Mongo Express**: `http://localhost:8081`
 - **MongoDB**: `localhost:27017`
 - **Redis**: `localhost:6379`
@@ -89,12 +78,6 @@ chmod +x setup.sh
 3) Suba os containers:
 ```bash
 docker compose up -d
-```
-
-4) Gere as chaves da aplicação:
-```bash
-docker compose exec app php artisan key:generate
-docker compose exec app php artisan jwt:secret
 ```
 
 ## Serviços e portas
